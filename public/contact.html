@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — Creoveya</title>
+<meta name="description" content="Get in touch with the Creoveya team.">
+<link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="/"><img src="/img/logo.svg" class="brand-mark" alt="Creoveya">Creoveya</a>
+    <div class="nav-links">
+      <a href="/features.html">Features</a>
+      <a href="/how-it-works.html">How it works</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/login.html" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="/register.html" class="btn btn-primary btn-sm">Get Started</a>
+    </div>
+    <button class="nav-toggle" id="navToggle">☰</button>
+  </div>
+</nav>
+
+<header class="hero" style="padding-bottom: 0;">
+  <div class="container">
+    <div class="hero-eyebrow"><span class="dot"></span> CONTACT US</div>
+    <h1 style="font-size: clamp(2rem, 4vw, 2.8rem); max-width: 700px;">Have a question or an issue?</h1>
+    <p style="max-width: 600px; font-size: 1.05rem;">Send us a message and our team will get back to you.</p>
+  </div>
+</header>
+
+<section class="section" id="contact">
+  <div class="container">
+    <div class="grid grid-2" style="align-items: flex-start; max-width: 920px; margin: 0 auto;">
+      <div>
+        <h3>Get in touch</h3>
+        <p>Whether it's a billing question, a technical issue, or general feedback — we read every message.</p>
+        <p>You can also reach us directly on
+          <a href="#" id="telegramLink" target="_blank">Telegram</a>.</p>
+      </div>
+      <div class="card">
+        <div class="error-banner" id="contactError"></div>
+        <div class="success-banner" id="contactSuccess"></div>
+        <form id="contactForm">
+          <div class="form-group">
+            <label for="contactName">Your name</label>
+            <input type="text" id="contactName" required>
+          </div>
+          <div class="form-group">
+            <label for="contactMessage">Message</label>
+            <textarea id="contactMessage" required placeholder="Tell us what's going on..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand" style="color:#fff; margin-bottom: 14px;"><img src="/img/logo.svg" class="brand-mark" alt="Creoveya">Creoveya</div>
+        <p style="max-width: 320px;">An ECO SOLACE GLOBAL LTD brand. AI educational video &amp; creator platform.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <div class="flex" style="flex-direction: column; gap: 8px;">
+          <a href="/features.html">Features</a><a href="/pricing.html">Pricing</a><a href="/register.html">Get Started</a>
+        </div>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <div class="flex" style="flex-direction: column; gap: 8px;">
+          <a href="/pages/terms.html">Terms of Service</a>
+          <a href="/pages/privacy.html">Privacy Policy</a>
+          <a href="/pages/refund-policy.html">Refund Policy</a>
+          <a href="/pages/cookies.html">Cookie Policy</a>
+          <a href="/pages/cookies.html" data-cookie-settings>Cookie Settings</a>
+          <a href="/pages/disclaimer.html">Disclaimer</a>
+        </div>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <div class="flex" style="flex-direction: column; gap: 8px;">
+          <a href="/contact.html">Contact</a>
+          <span style="color: rgba(255,255,255,.5); font-size: .85rem;">creoveya.com</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> ECO SOLACE GLOBAL LTD. All rights reserved.</span>
+      <span>Creoveya AI Live Studio</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script src="/js/contact.js"></script>
+</body>
+</html>
