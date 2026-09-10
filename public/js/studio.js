@@ -84,14 +84,36 @@ function audioConstraints() {
   return selectedMicId ? { deviceId: { exact: selectedMicId } } : true;
 }
 
+async function requestCameraStream(extraVideo = {}) {
+  const attempts = [];
+  if (selectedCameraId) attempts.push(videoConstraints(extraVideo));
+  attempts.push({ ...extraVideo });
+  attempts.push(true);
+
+  let lastError;
+  for (const video of attempts) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video, audio: false });
+      if (video !== attempts[0]) {
+        selectedCameraId = '';
+        document.getElementById('cameraSelect').value = '';
+      }
+      return stream;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError;
+}
+
 function mediaAccessMessage(err) {
   const messages = {
     NotAllowedError: 'Camera or microphone permission was denied. Allow both for Creoveya in your browser site settings, then try again.',
     PermissionDeniedError: 'Camera or microphone permission was denied. Allow both for Creoveya in your browser site settings, then try again.',
     NotFoundError: 'No camera or microphone was found. Connect a device and try again.',
     DevicesNotFoundError: 'No camera or microphone was found. Connect a device and try again.',
-    NotReadableError: 'Your camera or microphone is already being used by another app. Close apps such as Zoom, Teams, OBS, or Camera and try again.',
-    TrackStartError: 'Your camera or microphone is already being used by another app. Close apps such as Zoom, Teams, OBS, or Camera and try again.',
+    NotReadableError: 'Chrome cannot open the camera. It may be blocked by Windows privacy settings, a camera shutter, a driver issue, or a hidden browser tab. Check Windows camera access and reload Chrome.',
+    TrackStartError: 'Chrome cannot open the camera. It may be blocked by Windows privacy settings, a camera shutter, a driver issue, or a hidden browser tab. Check Windows camera access and reload Chrome.',
     OverconstrainedError: 'The selected camera or microphone is no longer available. Choose Default device and try again.',
     ConstraintNotSatisfiedError: 'The selected camera or microphone is no longer available. Choose Default device and try again.',
     SecurityError: 'The browser blocked camera access for this site. Open Creoveya over HTTPS and allow camera and microphone access.',
@@ -123,9 +145,8 @@ document.getElementById('previewBtn').addEventListener('click', async () => {
   }
 
   try {
-    // Preview and Decart currently use the camera feed only. Asking for a
-    // microphone here made a denied or missing mic block the camera preview.
-    localStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints(), audio: false });
+    if (localStream) localStream.getTracks().forEach((track) => track.stop());
+    localStream = await requestCameraStream();
     localPreview.srcObject = localStream;
     localPreview.style.display = 'block';
     placeholder.style.display = 'none';
@@ -321,10 +342,7 @@ async function goLive() {
     const model = models.realtime('lucy-2.1');
 
     if (!localStream) {
-      localStream = await navigator.mediaDevices.getUserMedia({
-        video: videoConstraints({ frameRate: model.fps, width: model.width, height: model.height }),
-        audio: false,
-      });
+      localStream = await requestCameraStream({ frameRate: model.fps, width: model.width, height: model.height });
       refreshDeviceLists();
     }
 
