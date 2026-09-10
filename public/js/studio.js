@@ -84,6 +84,21 @@ function audioConstraints() {
   return selectedMicId ? { deviceId: { exact: selectedMicId } } : true;
 }
 
+function mediaAccessMessage(err) {
+  const messages = {
+    NotAllowedError: 'Camera or microphone permission was denied. Allow both for Creoveya in your browser site settings, then try again.',
+    PermissionDeniedError: 'Camera or microphone permission was denied. Allow both for Creoveya in your browser site settings, then try again.',
+    NotFoundError: 'No camera or microphone was found. Connect a device and try again.',
+    DevicesNotFoundError: 'No camera or microphone was found. Connect a device and try again.',
+    NotReadableError: 'Your camera or microphone is already being used by another app. Close apps such as Zoom, Teams, OBS, or Camera and try again.',
+    TrackStartError: 'Your camera or microphone is already being used by another app. Close apps such as Zoom, Teams, OBS, or Camera and try again.',
+    OverconstrainedError: 'The selected camera or microphone is no longer available. Choose Default device and try again.',
+    ConstraintNotSatisfiedError: 'The selected camera or microphone is no longer available. Choose Default device and try again.',
+    SecurityError: 'The browser blocked camera access for this site. Open Creoveya over HTTPS and allow camera and microphone access.',
+  };
+  return messages[err?.name] || 'Could not access your camera/microphone. Check browser permissions, connected devices, and that you are using HTTPS, then try again.';
+}
+
 function updateUsageBanner() {
   if (secondsRemaining <= 0) {
     usageBanner.textContent = "You're out of streaming time. Purchase another credit plan to keep going live.";
@@ -102,8 +117,15 @@ function updateUsageBanner() {
 // Camera preview (local, pre-stream)
 // ---------------------------------------------------------------------
 document.getElementById('previewBtn').addEventListener('click', async () => {
+  if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+    alert('Camera access requires HTTPS (or localhost). Open Creoveya using its HTTPS URL and try again.');
+    return;
+  }
+
   try {
-    localStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints(), audio: audioConstraints() });
+    // Preview and Decart currently use the camera feed only. Asking for a
+    // microphone here made a denied or missing mic block the camera preview.
+    localStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints(), audio: false });
     localPreview.srcObject = localStream;
     localPreview.style.display = 'block';
     placeholder.style.display = 'none';
@@ -112,7 +134,15 @@ document.getElementById('previewBtn').addEventListener('click', async () => {
     // that we have it, so the dropdowns show real camera/mic names.
     refreshDeviceLists();
   } catch (err) {
-    alert('Could not access your camera/microphone. Please check permissions.');
+    console.error('[studio] Could not access camera/microphone:', {
+      name: err?.name,
+      message: err?.message,
+      constraint: err?.constraint,
+      secureContext: window.isSecureContext,
+      url: window.location.href,
+    });
+
+    alert(mediaAccessMessage(err));
   }
 });
 
@@ -318,8 +348,14 @@ async function goLive() {
     startHeartbeat();
     startClock();
   } catch (err) {
-    console.error('Decart connection failed:', err);
-    alert('Could not start the stream. Please check your camera permissions and try again.');
+    console.error('[studio] Could not start stream:', {
+      name: err?.name,
+      message: err?.message,
+      constraint: err?.constraint,
+      secureContext: window.isSecureContext,
+      url: window.location.href,
+    });
+    alert(err?.name ? mediaAccessMessage(err) : 'Could not start the stream. Check your account access and try again.');
     await stopLiveStream('error').catch(() => {});
   }
 }
