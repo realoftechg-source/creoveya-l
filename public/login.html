@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Tags <html> before any content paints, so the desktop-app styling
+  // (see .desktop-app rules in style.css) applies immediately with zero
+  // flash of the website-style layout first.
+  if (/CreoveyaDesktopApp/.test(navigator.userAgent)) document.documentElement.classList.add('desktop-app');
+</script>
+<title>Sign In — Creoveya</title>
+<link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .auth-shell {
+    animation: fadeIn 0.5s ease-out;
+  }
+  .auth-card {
+    animation: slideUp 0.6s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+</head>
+<body>
+<nav class="navbar auth-web-nav"><div class="navbar-inner">
+  <a class="brand" href="/"><img src="/img/logo.svg" class="brand-mark" alt="Creoveya">Creoveya</a>
+  <a href="/" class="btn btn-outline btn-sm">Back to Home</a>
+</div></nav>
+
+<div class="auth-shell">
+  <div class="desktop-app-brand">
+    <img src="/img/logo.svg" alt="Creoveya">
+    <div class="desktop-app-brand-text">
+      <strong>Creoveya</strong>
+      <span>AI Live Studio</span>
+    </div>
+  </div>
+  <div class="auth-card" id="authCard" style="visibility:hidden;">
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="location.href='/login.html'">Sign In</div>
+      <div class="auth-tab" onclick="location.href='/register.html'">Create Account</div>
+    </div>
+    <div class="error-banner" id="err"></div>
+    <p class="success-banner" id="suspendedMsg" style="background:var(--danger-bg); color:var(--danger);"></p>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" required autofocus>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+    </form>
+  </div>
+  <p class="desktop-app-footer">Creoveya Desktop</p>
+</div>
+
+<script src="/js/common.js"></script>
+<script>
+  // If a valid session already exists (e.g. reopening the desktop app,
+  // or returning to a browser tab left signed in), skip the form
+  // entirely and go straight to the right place — no need to log in
+  // again every time the app opens.
+  (async () => {
+    const user = await getSession();
+    if (user) {
+      if (user.isAdmin) window.location.href = '/admin_dashboard';
+      else if (user.hasActiveAccess) window.location.href = '/dashboard';
+      else window.location.href = '/payment';
+      return;
+    }
+    document.getElementById('authCard').style.visibility = 'visible';
+  })();
+
+  const params = new URLSearchParams(location.search);
+  if (params.get('suspended')) {
+    const el = document.getElementById('suspendedMsg');
+    el.textContent = 'Your account has been suspended. Contact support if you believe this is a mistake.';
+    el.classList.add('show');
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById('err');
+    errEl.classList.remove('show');
+    try {
+      const data = await apiFetch('/auth/login', {
+        method: 'POST',
+        body: { username: document.getElementById('username').value, password: document.getElementById('password').value },
+      });
+      if (data.user.isAdmin) window.location.href = '/admin_dashboard';
+      else if (data.user.hasActiveAccess) window.location.href = '/dashboard';
+      else window.location.href = '/payment';
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.add('show');
+    }
+  });
+</script>
+</body>
+</html>

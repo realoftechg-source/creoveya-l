@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How It Works — Creoveya</title>
+<meta name="description" content="How Creoveya AI Live Studio works, from signup to going live.">
+<link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="/"><img src="/img/logo.svg" class="brand-mark" alt="Creoveya">Creoveya</a>
+    <div class="nav-links">
+      <a href="/features.html">Features</a>
+      <a href="/how-it-works.html">How it works</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/login.html" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="/register.html" class="btn btn-primary btn-sm">Get Started</a>
+    </div>
+    <button class="nav-toggle" id="navToggle">☰</button>
+  </div>
+</nav>
+
+<header class="hero" style="padding-bottom: 0;">
+  <div class="container">
+    <div class="hero-eyebrow"><span class="dot"></span> HOW IT WORKS</div>
+    <h1 style="font-size: clamp(2rem, 4vw, 2.8rem); max-width: 700px;">Live in four simple steps.</h1>
+    <p style="max-width: 600px; font-size: 1.05rem;">From creating an account to going live, here's exactly what to expect.</p>
+  </div>
+</header>
+
+<section class="section" id="how-it-works">
+  <div class="container">
+    <div class="grid grid-2" style="gap: 32px;">
+      <div class="card">
+        <div class="card-icon">1️⃣</div>
+        <h3>Create an account</h3>
+        <p>Register in seconds, then choose a credit plan that fits how often you plan to stream.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">2️⃣</div>
+        <h3>Fund your account</h3>
+        <p>Pay by bank transfer or crypto, upload your receipt, and an admin approves it — usually quickly.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">3️⃣</div>
+        <h3>Choose your look</h3>
+        <p>Upload a reference face or pick a preset, preview your camera, and dial in your stream settings.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">4️⃣</div>
+        <h3>Go live</h3>
+        <p>Hit Go Live — your transformed feed streams instantly to viewers or into OBS.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section text-center">
+  <div class="container">
+    <h2>Ready to try it yourself?</h2>
+    <a href="/register.html" class="btn btn-primary">Get Started</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand" style="color:#fff; margin-bottom: 14px;"><img src="/img/logo.svg" class="brand-mark" alt="Creoveya">Creoveya</div>
+        <p style="max-width: 320px;">An ECO SOLACE GLOBAL LTD brand. AI educational video &amp; creator platform.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <div class="flex" style="flex-direction: column; gap: 8px;">
+          <a href="/features.html">Features</a><a href="/pricing.html">Pricing</a><a href="/register.html">Get Started</a>
+        </div>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <div class="flex" style="flex-direction: column; gap: 8px;">
+          <a href="/pages/terms.html">Terms of Service</a>
+          <a href="/pages/privacy.html">Privacy Policy</a>
+          <a href="/pages/refund-policy.html">Refund Policy</a>
+          <a href="/pages/cookies.html">Cookie Policy</a>
+          <a href="/pages/cookies.html" data-cookie-settings>Cookie Settings</a>
+          <a href="/pages/disclaimer.html">Disclaimer</a>
+        </div>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <div class="flex" style="flex-direction: column; gap: 8px;">
+          <a href="/contact.html">Contact</a>
+          <span style="color: rgba(255,255,255,.5); font-size: .85rem;">creoveya.com</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> ECO SOLACE GLOBAL LTD. All rights reserved.</span>
+      <span>Creoveya AI Live Studio</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>document.getElementById('year').textContent = new Date().getFullYear();
+document.getElementById('navToggle')?.addEventListener('click', () => {
+  const nav = document.querySelector('.nav-links');
+  const isOpen = nav.style.display === 'flex';
+  nav.style.display = isOpen ? 'none' : 'flex';
+  nav.style.cssText += isOpen ? '' : 'flex-direction:column; position:absolute; top:64px; left:0; right:0; background:#fff; padding:16px 24px; border-bottom:1px solid var(--border); gap:14px; z-index: 90;';
+});</script>
+</body>
+</html>

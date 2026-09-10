@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creoveya — AI Live Studio</title>
+<meta name="description" content="Creoveya AI Live Studio — real-time AI face transformation for creators and educators, by ECO SOLACE GLOBAL LTD.">
+<link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  body {
+    animation: fadeIn 0.6s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .hero {
+    animation: slideInDown 0.7s ease-out;
+  }
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .card {
+    animation: slideUp 0.5s ease-out forwards;
+    opacity: 0;
+  }
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.2s; }
+  .card:nth-child(3) { animation-delay: 0.3s; }
+  .card:nth-child(4) { animation-delay: 0.4s; }
+  .card:nth-child(5) { animation-delay: 0.5s; }
+  .card:nth-child(6) { animation-delay: 0.6s; }
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Loading splash screen */
+  .loading-splash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--blue-600) 0%, var(--blue-800) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: splashFadeOut 0.6s ease-out 2.8s forwards;
+  }
+  @keyframes splashFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; pointer-events: none; }
+  }
+  .splash-content {
+    text-align: center;
+    color: white;
+  }
+  .splash-logo {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    animation: splashBounce 1s ease-in-out infinite;
+  }
+  @keyframes splashBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  .splash-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .splash-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.8;
+  }
+  .loader {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 24px auto;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading splash screen -->
+<div class="loading-splash" id="loadingSplash">
+  <div class="splash-content">
+    <div class="splash-logo">🎭</div>
+    <div class="splash-text">Creoveya</div>
+    <div class="splash-subtitle">AI Live Studio</div>
+    <div class="loader"></div>
+  </div>
+</div>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="/"><img src="/img/logo.svg" class="brand-mark" alt="Creoveya">Creoveya</a>
+    <div class="nav-links">
+      <a href="/features.html">Features</a>
+      <a href="/how-it-works.html">How it works</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/login.html" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="/register.html" class="btn btn-primary btn-sm">Get Started</a>
+    </div>
+    <button class="nav-toggle" id="navToggle">☰</button>
+  </div>
+</nav>
+
+<!-- HERO / CAROUSEL -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-eyebrow"><span class="dot"></span> AI EDUCATIONAL VIDEO &amp; CREATOR PLATFORM</div>
+    <h1 style="font-size: clamp(2.1rem, 4.2vw, 3.2rem); max-width: 760px;">Real-time AI face transformation, built for creators and educators.</h1>
+    <p style="max-width: 620px; font-size: 1.05rem; margin-bottom: 32px;">
+      Creoveya AI Live Studio turns your webcam into a fully AI-transformed live stream — pick a look,
+      go live, and reach your audience through OBS or a direct share link. Built by ECO SOLACE GLOBAL LTD.
+    </p>
+    <div class="flex gap-12 mb-16">
+      <a href="/register.html" class="btn btn-primary">Start Creating — Get Started</a>
+      <a href="/how-it-works.html" class="btn btn-outline">See How It Works</a>
+    </div>
+  </div>
+
+  <div class="carousel-bleed">
+    <div class="carousel" id="heroCarousel">
+      <div class="carousel-track" id="carouselTrack"></div>
+      <button class="carousel-nav prev" id="carouselPrev">‹</button>
+      <button class="carousel-nav next" id="carouselNext">›</button>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+  </div>
+</header>
+
+<!-- FEATURES TEASER -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">What We Offer</div>
+      <h2>Everything you need to go live, transformed</h2>
+      <p>A complete real-time AI studio — no green screen, no render farm, no complicated setup.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="card-icon">🎭</div>
+        <h3>Real-Time AI Looks</h3>
+        <p>Swap your on-camera appearance instantly with AI-generated looks, applied live, frame by frame.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📡</div>
+        <h3>Stream Anywhere</h3>
+        <p>Pipe your transformed feed into OBS as a virtual camera, or share a direct watch link.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <h3>Secure by Design</h3>
+        <p>Your face data and API credentials are handled server-side, never trusted to the browser.</p>
+      </div>
+    </div>
+    <div class="text-center mt-24">
+      <a href="/features.html" class="btn btn-outline">See All Features</a>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS TEASER -->
+<section class="section section-alt" id="how-it-works">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">How It Works</div>
+      <h2>Live in four simple steps</h2>
+    </div>
+    <div class="grid grid-4">
+      <div class="card"><h3>1. Create an account</h3><p>Register in seconds, then choose a plan.</p></div>
+      <div class="card"><h3>2. Fund your account</h3><p>Pay by bank transfer or crypto, get approved.</p></div>
+      <div class="card"><h3>3. Choose your look</h3><p>Upload a face or pick a preset.</p></div>
+      <div class="card"><h3>4. Go live</h3><p>Your transformed feed streams instantly.</p></div>
+    </div>
+    <div class="text-center mt-24">
+      <a href="/how-it-works.html" class="btn btn-outline">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING TEASER -->
+<section class="section" id="pricing">
+  <div class="container text-center">
+    <div class="section-eyebrow">Pricing</div>
+    <h2>Simple, transparent plans</h2>
+    <p style="max-width: 480px; margin: 0 auto 28px;">Activation and top-up plans, managed live by our team — see exactly what's available right now.</p>
+    <a href="/pricing.html" class="btn btn-primary">View Pricing</a>
+  </div>
+</section>
+
+<!-- DOWNLOAD DESKTOP APP -->
+<section class="section section-alt" id="download">
+  <div class="container">
+    <div class="card" style="background: linear-gradient(135deg, var(--blue-900), var(--blue-700)); border: none; padding: 40px; display: flex; align-items: center; justify-content: space-between; gap: 28px; flex-wrap: wrap;">
+      <div style="max-width: 520px;">
+        <div class="section-eyebrow" style="color:#9fc0ff;">Desktop App</div>
+        <h2 style="color:#fff;">Creoveya, right on your desktop.</h2>
+        <p style="color: rgba(255,255,255,.82); margin-bottom: 0;">
+          Get the native Windows app for a faster, distraction-free way to go live —
+          same account, same credits, same studio, no browser tab required.
+        </p>
+      </div>
+      <div class="text-center">
+        <a href="/downloads/CreoveyaSetup.exe" class="btn" style="background:#fff; color: var(--blue-900); padding: 1rem 2rem; font-size: 1.05rem;">
+          🖥️ Download for Windows
+        </a>
+        <p style="color: rgba(255,255,255,.6); font-size: .78rem; margin: 10px 0 0;">Windows 10/11 · Free</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT TEASER -->
+<section class="section" id="contact">
+  <div class="container text-center">
+    <div class="section-eyebrow">Contact Us</div>
+    <h2>Have a question or an issue?</h2>
+    <p style="max-width: 480px; margin: 0 auto 28px;">Send us a message and our team will get back to you.</p>
+    <a href="/contact.html" class="btn btn-primary">Contact Us</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand" style="color:#fff; margin-bottom: 14px;"><img src="/img/logo.svg" class="brand-mark" alt="Creoveya">Creoveya</div>
+        <p style="max-width: 320px;">An ECO SOLACE GLOBAL LTD brand. AI educational video &amp; creator platform.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <div class="flex" style="flex-direction: column; gap: 8px;">
+          <a href="/features.html">Features</a><a href="/pricing.html">Pricing</a><a href="/register.html">Get Started</a>
+        </div>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <div class="flex" style="flex-direction: column; gap: 8px;">
+          <a href="/pages/terms.html">Terms of Service</a>
+          <a href="/pages/privacy.html">Privacy Policy</a>
+          <a href="/pages/refund-policy.html">Refund Policy</a>
+          <a href="/pages/cookies.html">Cookie Policy</a>
+          <a href="/pages/cookies.html" data-cookie-settings>Cookie Settings</a>
+          <a href="/pages/disclaimer.html">Disclaimer</a>
+        </div>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <div class="flex" style="flex-direction: column; gap: 8px;">
+          <a href="/contact.html">Contact</a>
+          <span style="color: rgba(255,255,255,.5); font-size: .85rem;">creoveya.com</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> ECO SOLACE GLOBAL LTD. All rights reserved.</span>
+      <span>Creoveya AI Live Studio</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+  // Hide loading splash after 3 seconds
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const splash = document.getElementById('loadingSplash');
+      if (splash) splash.remove();
+    }, 2800);
+  });
+</script>
+<script src="/js/landing.js"></script>
+</body>
+</html>
