@@ -15,6 +15,7 @@ async function renderUserChrome() {
 
   const path = window.location.pathname;
   document.getElementById('sidebar').innerHTML = `
+    <button type="button" class="sidebar-close" id="sidebarCloseBtn" aria-label="Close navigation">×</button>
     <a class="brand" href="/"><img src="/img/logo.svg" class="brand-mark" alt="Creoveya">Creoveya</a>
     ${NAV_ITEMS.map((item) => `
       <a class="sidebar-link ${path.startsWith(item.href.split('#')[0]) ? 'active' : ''}" href="${item.href}">
@@ -56,6 +57,9 @@ async function renderUserChrome() {
 
   document.getElementById('menuToggle')?.addEventListener('click', () => {
     document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.getElementById('sidebarCloseBtn')?.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
   });
 
   return user;
