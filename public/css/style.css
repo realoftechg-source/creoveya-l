@@ -295,6 +295,7 @@ html.desktop-app .desktop-app-footer {
   position: sticky; top: 0; height: 100vh; overflow-y: auto; transition: transform .2s ease;
 }
 .app-sidebar .brand { padding: 6px 10px 20px; }
+.sidebar-close { display: none; align-self: flex-end; background: none; border: 0; color: var(--text-muted); cursor: pointer; font-size: 1.6rem; line-height: 1; padding: 2px 8px; }
 .sidebar-link {
   display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius-sm);
   color: var(--text-secondary); font-weight: 500; font-size: .92rem; cursor: pointer; border: none; background: none; width: 100%; text-align: left;
@@ -391,6 +392,7 @@ tr:last-child td { border-bottom: none; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .app-sidebar { position: fixed; left: 0; top: 0; z-index: 150; transform: translateX(-100%); box-shadow: var(--shadow-lg); }
   .app-sidebar.open { transform: translateX(0); }
+  .sidebar-close { display: block; }
   .menu-toggle { display: flex; }
 }
 @media (max-width: 768px) {

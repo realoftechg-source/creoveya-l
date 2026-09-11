@@ -2,6 +2,9 @@ let realtimeSession = null;
 let localStream = null;
 let heartbeatTimer = null;
 let selectedLookPrompt = '';
+let selectedLookId = '';
+let decartClient = null;
+let referenceImageRef = null;
 
 const video = document.getElementById('transformedFeed');
 const placeholder = document.getElementById('placeholder');
@@ -36,15 +39,18 @@ async function init() {
   stopBtn.addEventListener('click', () => stopFeed('user_stopped'));
   lookSelect.addEventListener('change', async () => {
     const id = lookSelect.value;
-    if (!id) { selectedLookPrompt = ''; }
+    if (!id) { selectedLookPrompt = ''; selectedLookId = ''; referenceImageRef = null; }
     else {
       try {
         const data = await apiFetch(`/api/studio/looks/${id}/select`, { method: 'POST' });
         selectedLookPrompt = data.look.prompt || '';
+        selectedLookId = id;
+        referenceImageRef = null;
+        if (realtimeSession) await loadReferenceImage();
       } catch (e) { /* ignore — falls back to current prompt */ }
     }
     if (realtimeSession) {
-      try { await realtimeSession.set({ prompt: selectedLookPrompt || 'Apply a natural, high-fidelity AI transformation.', enhance: true }); } catch (e) {}
+      try { await realtimeSession.set({ prompt: selectedLookPrompt || 'Transform my live face into the person in the reference image.', image: referenceImageRef || null, enhance: true }); } catch (e) {}
     }
   });
 }
@@ -57,7 +63,7 @@ async function goLive() {
   try {
     await apiFetch('/api/studio/stream/start', { method: 'POST' });
 
-    const { createDecartClient, models } = await import('https://cdn.jsdelivr.net/npm/@decartai/sdk@0.1.14/+esm');
+    const { createDecartClient, models } = await import('https://cdn.jsdelivr.net/npm/@decartai/sdk@0.1.22/+esm');
     const tokenRes = await apiFetch('/api/studio/realtime-token', { method: 'POST' });
     const model = models.realtime('lucy-2.1');
 
@@ -66,10 +72,15 @@ async function goLive() {
       audio: false,
     });
 
-    const client = createDecartClient({ apiKey: tokenRes.apiKey });
-    realtimeSession = await client.realtime.connect(localStream, {
+    decartClient = createDecartClient({ apiKey: tokenRes.apiKey });
+    await loadReferenceImage();
+    realtimeSession = await decartClient.realtime.connect(localStream, {
       model,
       mirror: 'auto',
+      initialState: {
+        prompt: { text: selectedLookPrompt || (referenceImageRef ? 'Transform my live face into the person in the reference image.' : 'Apply a natural, high-fidelity AI transformation.'), enhance: true },
+        image: referenceImageRef || undefined,
+      },
       onRemoteStream: (stream) => {
         video.srcObject = stream;
         video.style.display = 'block';
@@ -78,10 +89,6 @@ async function goLive() {
         statusEl.textContent = '● LIVE — ready for OBS to capture';
       },
     });
-
-    if (selectedLookPrompt) {
-      try { await realtimeSession.set({ prompt: selectedLookPrompt, enhance: true }); } catch (e) {}
-    }
 
     clearInterval(heartbeatTimer);
     heartbeatTimer = setInterval(async () => {
@@ -101,6 +108,15 @@ async function goLive() {
     goLiveBtn.disabled = false;
     goLiveBtn.textContent = 'Start Transformed Feed';
   }
+}
+
+async function loadReferenceImage() {
+  referenceImageRef = null;
+  if (!selectedLookId || !decartClient) return;
+  const response = await fetch(`/api/studio/looks/${selectedLookId}/image`, { credentials: 'include' });
+  if (!response.ok) throw new Error('The selected reference image could not be loaded.');
+  const uploaded = await decartClient.files.upload(await response.blob(), { ttlSeconds: 86400 });
+  referenceImageRef = uploaded.id;
 }
 
 async function stopFeed(reason, skipServerStop) {

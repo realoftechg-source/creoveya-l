@@ -6,6 +6,8 @@ let clockTimer = null;
 let secondsRemaining = 0;
 let secondsElapsedThisSession = 0;
 let selectedLook = null; // { id, name, prompt } or null = "My Camera" (live prompt box only)
+let decartClient = null;
+let referenceImageRef = null;
 let mirrored = false;
 let selectedCameraId = '';
 let selectedMicId = '';
@@ -282,6 +284,7 @@ async function loadLooks() {
 async function selectLook(lookId) {
   if (!lookId) {
     selectedLook = null;
+    referenceImageRef = null;
     document.querySelectorAll('[data-look]').forEach((el) => el.classList.toggle('active', el.dataset.look === ''));
     if (realtimeSession) updatePipelineParameters();
     return;
@@ -289,12 +292,25 @@ async function selectLook(lookId) {
   try {
     const data = await apiFetch(`/api/studio/looks/${lookId}/select`, { method: 'POST' });
     selectedLook = data.look;
+    referenceImageRef = null;
+    if (realtimeSession && decartClient) await loadReferenceImage(decartClient);
     document.querySelectorAll('[data-look]').forEach((el) => el.classList.toggle('active', el.dataset.look === String(lookId)));
     if (realtimeSession) updatePipelineParameters();
   } catch (err) {
     if (err.data?.code === 'no_balance') showOutOfBalance();
     else alert(err.message);
   }
+}
+
+async function loadReferenceImage(client) {
+  referenceImageRef = null;
+  if (!selectedLook?.id) return;
+
+  const response = await fetch(`/api/studio/looks/${selectedLook.id}/image`, { credentials: 'include' });
+  if (!response.ok) throw new Error('The selected reference image could not be loaded. Please upload it again.');
+  const imageBlob = await response.blob();
+  const uploaded = await client.files.upload(imageBlob, { ttlSeconds: 86400 });
+  referenceImageRef = uploaded.id;
 }
 
 async function submitLook(e) {
@@ -336,7 +352,7 @@ async function goLive() {
 
     // 2. Load the Decart SDK and get a short-lived client token from
     //    our server (the permanent API key never reaches the browser).
-    const { createDecartClient, models } = await import('https://cdn.jsdelivr.net/npm/@decartai/sdk@0.1.14/+esm');
+    const { createDecartClient, models } = await import('https://cdn.jsdelivr.net/npm/@decartai/sdk@0.1.22/+esm');
     const tokenRes = await apiFetch('/api/studio/realtime-token', { method: 'POST' });
 
     const model = models.realtime('lucy-2.1');
@@ -346,10 +362,16 @@ async function goLive() {
       refreshDeviceLists();
     }
 
-    const client = createDecartClient({ apiKey: tokenRes.apiKey });
-    realtimeSession = await client.realtime.connect(localStream, {
+    decartClient = createDecartClient({ apiKey: tokenRes.apiKey });
+    await loadReferenceImage(decartClient);
+    const initialPrompt = document.getElementById('promptInput').value.trim() || selectedLook?.prompt || 'Transform my live face into the person in the reference image while preserving the live facial expressions and camera motion.';
+    realtimeSession = await decartClient.realtime.connect(localStream, {
       model,
       mirror: 'auto',
+      initialState: {
+        prompt: { text: initialPrompt, enhance: true },
+        image: referenceImageRef || undefined,
+      },
       onRemoteStream: (stream) => {
         placeholder.style.display = 'none';
         localPreview.style.display = 'none';
@@ -380,9 +402,11 @@ async function goLive() {
 
 async function updatePipelineParameters() {
   if (!realtimeSession) return;
-  const promptValue = document.getElementById('promptInput').value.trim() || selectedLook?.prompt || 'Apply a natural, high-fidelity AI transformation.';
+  const promptValue = document.getElementById('promptInput').value.trim() || selectedLook?.prompt || (referenceImageRef
+    ? 'Transform my live face into the person in the reference image while preserving the live facial expressions and camera motion.'
+    : 'Apply a natural, high-fidelity AI transformation.');
   try {
-    await realtimeSession.set({ prompt: promptValue, enhance: true });
+    await realtimeSession.set({ prompt: promptValue, image: referenceImageRef || null, enhance: true });
   } catch (e) {
     console.warn('Pipeline parameter sync warning:', e);
   }
@@ -427,6 +451,8 @@ async function stopLiveStream(reason, skipServerStop) {
     try { realtimeSession.disconnect(); } catch (e) {}
     realtimeSession = null;
   }
+  decartClient = null;
+  referenceImageRef = null;
   if (!skipServerStop) {
     try {
       const data = await apiFetch('/api/studio/stream/stop', { method: 'POST' });

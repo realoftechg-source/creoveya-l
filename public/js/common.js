@@ -83,7 +83,7 @@ function formatMinutes(seconds) {
 // consent choice itself, sidebar/nav state, etc). Nothing here is
 // third-party advertising or analytics tracking.
 // ---------------------------------------------------------------------------
-const COOKIE_CONSENT_KEY = 'creoveya_cookie_consent';
+const COOKIE_CONSENT_KEY = 'creoveya_cookie_consent_v2';
 
 function getCookieConsent() {
   try {
