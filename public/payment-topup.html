@@ -32,7 +32,7 @@
     <h3>1. Choose your plan</h3>
     <h4>Activation Plans</h4>
     <div class="grid grid-2" id="activationPlanOptions"></div>
-    <h4 class="mt-16">Top-Up Plans</h4>
+    <h4 class="mt-16 hidden" id="topupPlansHeading">Top-Up Plans</h4>
     <div class="grid grid-2" id="planOptions"></div>
   </div>
 
@@ -93,6 +93,7 @@ async function init() {
 }
 
 function renderPlans() {
+  document.getElementById('topupPlansHeading').classList.toggle('hidden', plans.length === 0);
   document.getElementById('activationPlanOptions').innerHTML = activationPlans.map((p) => `
     <div class="card" data-plan="${p.id}" data-type="activation" style="cursor:pointer; border-width:2px;">
       <h3>${p.name}</h3>
