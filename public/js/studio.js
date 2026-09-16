@@ -216,12 +216,25 @@ function bindControls() {
   // Fullscreen toggle — matches the icon/behavior used on the public
   // watch page for consistency.
   const fsBtn = document.getElementById('fullscreenBtn');
-  fsBtn.addEventListener('click', () => {
-    if (!document.fullscreenElement) cameraWrap.requestFullscreen?.().catch(() => {});
-    else document.exitFullscreen?.();
+  fsBtn.addEventListener('click', async () => {
+    try {
+      if (document.fullscreenElement) {
+        if (document.exitFullscreen) await document.exitFullscreen();
+        return;
+      }
+
+      const requestFullscreen = cameraWrap.requestFullscreen || cameraWrap.webkitRequestFullscreen;
+      if (!requestFullscreen) {
+        console.warn('[studio] Fullscreen is not supported by this browser.');
+        return;
+      }
+      await requestFullscreen.call(cameraWrap);
+    } catch (err) {
+      console.warn('[studio] Fullscreen request was blocked:', err);
+    }
   });
   document.addEventListener('fullscreenchange', () => {
-    fsBtn.textContent = document.fullscreenElement === cameraWrap ? '⤡' : '⤢';
+    fsBtn.textContent = document.fullscreenElement ? '⤡' : '⤢';
   });
 
   document.getElementById('promptInput').addEventListener('input', () => {
