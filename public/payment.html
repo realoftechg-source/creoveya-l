@@ -174,7 +174,7 @@ async function init() {
 
   // Otherwise show normal flow
   renderPlans();
-  if (topupPlans.length) renderTopupPlans();
+  if (user.hasActiveAccess && !user.isTrialPlan && topupPlans.length) renderTopupPlans();
 }
 
 function renderTopupOnly(topupPlans) {

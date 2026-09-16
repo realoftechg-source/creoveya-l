@@ -14,6 +14,11 @@ function isCreatorPlan(plan) {
   return name === 'creator' || name === 'creator plan' || name === 'full access';
 }
 
+function isStarterPlan(plan) {
+  const name = String(plan?.name || '').trim().toLowerCase();
+  return name === 'starter' || name === 'trial' || name === 'starter plan';
+}
+
 const RECEIPTS_DIR = path.join(__dirname, '..', 'uploads', 'receipts');
 fs.mkdirSync(RECEIPTS_DIR, { recursive: true });
 
@@ -68,11 +73,13 @@ router.get('/plans', async (req, res, next) => {
     const settings = await db.get('SELECT credits_per_minute FROM platform_settings WHERE id = 1');
     let plans = await db.all('SELECT * FROM credit_plans WHERE is_active = 1 ORDER BY sort_order, price');
 
-    // Starter accounts may upgrade only to Creator. Keep this restriction
-    // server-side because the payment page is not a security boundary.
-    if (req.user?.is_trial_plan) {
-      plans = plans.filter(isCreatorPlan);
-    }
+    // The public catalogue and every payment page expose only the two
+    // customer-facing activation tiers. Keep this server-side so extra
+    // admin-created plans cannot leak into customer purchase flows.
+    plans = plans.filter((plan) => isStarterPlan(plan) || isCreatorPlan(plan));
+
+    // Starter accounts may upgrade only to Creator.
+    if (req.user?.is_trial_plan) plans = plans.filter(isCreatorPlan);
     res.json({
       ok: true,
       creditsPerMinute: Number(settings.credits_per_minute),
@@ -119,9 +126,11 @@ router.get('/methods', async (req, res, next) => {
 // Public: active top-up plans shown on the homepage/payment page.
 router.get('/topup-plans', async (req, res, next) => {
   try {
-    // Top-ups are a Creator-only benefit. Anonymous visitors can still see
-    // the catalogue on public pages, but Starter users must not receive it.
-    if (req.user?.is_trial_plan) return res.json({ ok: true, plans: [] });
+    // Top-ups are a Creator-only benefit. Anonymous visitors and Starter
+    // users must not receive the catalogue.
+    if (!req.user || !req.user.has_active_access || req.user.is_trial_plan) {
+      return res.json({ ok: true, plans: [] });
+    }
     const plans = await db.all('SELECT * FROM topup_plans WHERE is_active = 1 ORDER BY sort_order, price');
     console.log('[payments/topup-plans] Found', plans.length, 'active top-up plans');
     res.json({

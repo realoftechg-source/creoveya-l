@@ -27,10 +27,16 @@ async function loadActivationPlans() {
 
 async function loadTopupPlans() {
   const grid = document.getElementById('topupPlansGrid');
+  const section = document.getElementById('topup-plans');
   try {
+    const user = await getSession();
+    if (!user || !user.hasActiveAccess || user.isTrialPlan) {
+      section.classList.add('hidden');
+      return;
+    }
     const data = await apiFetch('/api/payments/topup-plans');
     if (!data.plans.length) {
-      grid.innerHTML = '<p class="text-muted text-center">No top-up plans are configured yet — check back soon.</p>';
+      section.classList.add('hidden');
       return;
     }
     grid.innerHTML = data.plans.map((p) => `
