@@ -274,11 +274,36 @@ async function loadLooks() {
     <div class="look-card ${selectedLook?.id === look.id ? 'active' : ''}" data-look="${look.id ?? ''}">
       <div class="look-avatar">${look.builtin ? '📷' : `<img src="/api/studio/looks/${look.id}/image" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`}</div>
       <span>${look.name}</span>
+      ${look.builtin ? '' : `<button type="button" class="look-delete-btn" data-delete-look="${look.id}" aria-label="Delete ${look.name}" title="Delete saved face">Delete</button>`}
     </div>
   `).join('');
   grid.querySelectorAll('[data-look]').forEach((el) => {
     el.addEventListener('click', () => selectLook(el.dataset.look || null));
   });
+  grid.querySelectorAll('[data-delete-look]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      deleteLook(button.dataset.deleteLook);
+    });
+  });
+}
+
+async function deleteLook(lookId) {
+  const look = document.querySelector(`[data-look="${CSS.escape(String(lookId))}"]`);
+  const lookName = look?.querySelector('span')?.textContent || 'this saved face';
+  if (!window.confirm(`Delete ${lookName}? This cannot be undone.`)) return;
+
+  try {
+    await apiFetch(`/api/studio/looks/${lookId}`, { method: 'DELETE' });
+    if (selectedLook?.id === Number(lookId)) {
+      selectedLook = null;
+      referenceImageRef = null;
+      if (realtimeSession) await updatePipelineParameters();
+    }
+    await loadLooks();
+  } catch (err) {
+    alert(err.message || 'Could not delete this saved face. Please try again.');
+  }
 }
 
 async function selectLook(lookId) {

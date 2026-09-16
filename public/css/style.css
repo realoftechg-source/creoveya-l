@@ -372,6 +372,8 @@ tr:last-child td { border-bottom: none; }
 .look-avatar { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 6px; object-fit: cover; border: 2px solid transparent; background: var(--blue-100); display: flex; align-items: center; justify-content: center; color: var(--blue-600); }
 .look-card.active .look-avatar { border-color: var(--blue-600); }
 .look-card span { font-size: .78rem; color: var(--text-secondary); display: block; }
+.look-delete-btn { margin-top: 5px; padding: 2px 6px; border: 0; background: none; color: var(--danger); cursor: pointer; font: inherit; font-size: .7rem; }
+.look-delete-btn:hover { text-decoration: underline; }
 
 /* ---------------- Utility ---------------- */
 .flex { display: flex; flex-wrap: wrap; }
