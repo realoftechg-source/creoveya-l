@@ -45,6 +45,17 @@ function createWindow() {
 
   mainWindow.loadURL(LOAD_URL);
 
+  // Forward the Studio video's HTML fullscreen request to the native
+  // Electron window. Chromium accepts the page request, but Electron does
+  // not automatically maximize the native window unless these events are
+  // handled explicitly.
+  mainWindow.webContents.on('enter-html-full-screen', () => {
+    mainWindow.setFullScreen(true);
+  });
+  mainWindow.webContents.on('leave-html-full-screen', () => {
+    mainWindow.setFullScreen(false);
+  });
+
   // Camera/mic prompts (needed for the Studio's getUserMedia calls) are
   // auto-approved once, matching what a browser would ask the user
   // anyway — everything else stays default (denied).
