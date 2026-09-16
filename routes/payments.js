@@ -9,6 +9,11 @@ const { sendAdminPaymentNotification } = require('../utils/email');
 
 const router = express.Router();
 
+function isCreatorPlan(plan) {
+  const name = String(plan?.name || '').trim().toLowerCase();
+  return name === 'creator' || name === 'creator plan' || name === 'full access';
+}
+
 const RECEIPTS_DIR = path.join(__dirname, '..', 'uploads', 'receipts');
 fs.mkdirSync(RECEIPTS_DIR, { recursive: true });
 
@@ -61,7 +66,13 @@ function uploadReceipt(req, res, next) {
 router.get('/plans', async (req, res, next) => {
   try {
     const settings = await db.get('SELECT credits_per_minute FROM platform_settings WHERE id = 1');
-    const plans = await db.all('SELECT * FROM credit_plans WHERE is_active = 1 ORDER BY sort_order, price');
+    let plans = await db.all('SELECT * FROM credit_plans WHERE is_active = 1 ORDER BY sort_order, price');
+
+    // Starter accounts may upgrade only to Creator. Keep this restriction
+    // server-side because the payment page is not a security boundary.
+    if (req.user?.is_trial_plan) {
+      plans = plans.filter(isCreatorPlan);
+    }
     res.json({
       ok: true,
       creditsPerMinute: Number(settings.credits_per_minute),
@@ -108,6 +119,9 @@ router.get('/methods', async (req, res, next) => {
 // Public: active top-up plans shown on the homepage/payment page.
 router.get('/topup-plans', async (req, res, next) => {
   try {
+    // Top-ups are a Creator-only benefit. Anonymous visitors can still see
+    // the catalogue on public pages, but Starter users must not receive it.
+    if (req.user?.is_trial_plan) return res.json({ ok: true, plans: [] });
     const plans = await db.all('SELECT * FROM topup_plans WHERE is_active = 1 ORDER BY sort_order, price');
     console.log('[payments/topup-plans] Found', plans.length, 'active top-up plans');
     res.json({
@@ -162,11 +176,19 @@ router.post('/submit', requireLogin, uploadReceipt, async (req, res, next) => {
         console.warn('[payments/submit] User', req.user.id, 'lacks active access for topup');
         return res.status(400).json({ error: 'You must have an active account to purchase a top-up plan.' });
       }
+      if (req.user.is_trial_plan) {
+        console.warn('[payments/submit] Starter user', req.user.id, 'attempted topup');
+        return res.status(403).json({ error: 'Top-ups are available after upgrading to the Creator plan.', code: 'creator_required' });
+      }
     } else {
       plan = await db.get('SELECT * FROM credit_plans WHERE id = ? AND is_active = 1', [planId]);
       if (!plan) {
         console.warn('[payments/submit] Activation plan', planId, 'not found or inactive');
         return res.status(400).json({ error: 'Invalid plan selected.' });
+      }
+      if (req.user.is_trial_plan && !isCreatorPlan(plan)) {
+        console.warn('[payments/submit] Starter user', req.user.id, 'attempted non-Creator upgrade');
+        return res.status(403).json({ error: 'Starter accounts may upgrade only to the Creator plan.', code: 'creator_required' });
       }
       if (plan.is_trial && req.user.is_trial_plan) {
         console.warn('[payments/submit] User', req.user.id, 'already on trial');
